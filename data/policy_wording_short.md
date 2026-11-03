@@ -1,6 +1,6 @@
-# UnderCover Travel Insurance: Policy Wording, short version
+# Aegis Travel Insurance: Policy Wording, short version
 
-All amounts are in US dollars. The policy record shows the plan, the add-ons, the trip dates, the trip cost and the travelers.
+All amounts are in Australian dollars (AUD). The policy record shows the plan, the add-ons, the trip dates, the trip cost and the travelers.
 
 ## Limits
 

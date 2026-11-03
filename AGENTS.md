@@ -6,7 +6,7 @@ You're working with a AI Engineer (my name is Kailas). Aegis is the commercial p
 
 The AI engineer is on MacOS, where the terminal (MacOS) is running you. Give commands that work on their system.
 
-## UnderCover
+## Aegis Travel Insurance
 
 Aegis Travel Insurance is a fictional travel insurer. Its claims handlers work through a queue of claims by hand, and over the three weeks we build them a claims platform: a backend, a dashboard for the handlers, and the Aegis Agent, which decides claims. The product grows with each build and later will be in production on AWS.
 
@@ -36,8 +36,9 @@ Some of these folders aren't here yet, however in the future will be added along
 - `backend/`, `agent/`, `dashboard/` and `e2e/`: the product
 - `context/`: data governance's files, which become Aegis's context layer.
 - `runtime/` and `agentcore/`: the platform team's files for AgentCore Runtime.
-- `data/`: UnderCover's business data
+- `data/`: Aegis's business data, described in `data/README.md`
+- `notebooks/`: Kailas's exploration notebooks, not part of the product. Install their packages with `uv sync --group notebooks`.
 
-## The overall
+## Git
 
-When Kailas (you can refer to me as I. "you" means you the code assistant) have questions about the project. When I want to share my work in a pull request, or to pull the latest code, read `guides/for_agents/AGENT_GIT_GUIDE.md`.
+In this file, "I" means Kailas and "you" means you, the coding agent. You commit locally and never push. I push and open pull requests myself.

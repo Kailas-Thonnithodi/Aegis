@@ -1,8 +1,8 @@
-# UnderCover Travel Insurance: Policy Wording
+# Aegis Travel Insurance: Policy Wording
 
 Version 2026.1, for policies bought on or after January 1, 2026.
 
-This document explains what your UnderCover policy covers, what it leaves out and how we work out what we pay. Your policy record shows your plan, any add-ons you bought, the dates of your covered trip and the travelers on it. All amounts are in US dollars.
+This document explains what your Aegis policy covers, what it leaves out and how we work out what we pay. Your policy record shows your plan, any add-ons you bought, the dates of your covered trip and the travelers on it. All amounts are in Australian dollars (AUD).
 
 ## 1. Your plan
 
