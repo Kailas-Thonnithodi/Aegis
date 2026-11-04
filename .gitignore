@@ -226,3 +226,6 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Aegis database
+aegis.db

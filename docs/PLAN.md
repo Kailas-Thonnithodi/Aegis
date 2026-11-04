@@ -54,14 +54,14 @@ Load Aegis's records into SQLite and serve them.
 
 Success criteria:
 
-- [ ] `uv run pytest backend` passes with tests for every operation, the seed, and 404 for an unknown claim or policy.
-- [ ] `uv run -m backend.seed` prints that it loaded 25 claims and 50 policies.
-- [ ] `curl -s localhost:8000/api/claims` returns 25 claims, all `waiting`.
-- [ ] `curl -s localhost:8000/api/claims/CLM-1001` returns the claim with its 3 items and 4 documents, and `outcome`, `payout` and `payment` set to null.
-- [ ] `curl -s localhost:8000/api/claims/CLM-1005/history` returns exactly CLM-1006, and CLM-1001's history is empty.
-- [ ] `curl -s localhost:8000/api/policy-wording` returns text that starts with `# Aegis Travel Insurance: Policy Wording`.
-- [ ] `grep -rn "evals" backend agent dashboard` prints nothing.
-- [ ] `npm run check` passes.
+- [x] `uv run pytest backend` passes with tests for every operation, the seed, and 404 for an unknown claim or policy.
+- [x] `uv run -m backend.seed` prints that it loaded 25 claims and 50 policies.
+- [x] `curl -s localhost:8000/api/claims` returns 25 claims, all `waiting`.
+- [x] `curl -s localhost:8000/api/claims/CLM-1001` returns the claim with its 3 items and 4 documents, and `outcome`, `payout` and `payment` set to null.
+- [x] `curl -s localhost:8000/api/claims/CLM-1005/history` returns exactly CLM-1006, and CLM-1001's history is empty.
+- [x] `curl -s localhost:8000/api/policy-wording` returns text that starts with `# Aegis Travel Insurance: Policy Wording`.
+- [x] `grep -rn "evals" backend agent dashboard` prints nothing.
+- [x] `npm run check` passes.
 
 ## Phase 2: Decisions, payments and sign-off
 
