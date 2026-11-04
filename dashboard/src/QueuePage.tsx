@@ -1,4 +1,6 @@
-import { api, type ClaimSummary, type Status } from "./api";
+import { useState } from "react";
+
+import { api, type ClaimSummary, type QueueRun, type Status } from "./api";
 import { date, label, money, outcomeLabels, statusLabels } from "./format";
 import { usePolling } from "./hooks";
 import { StatusPill } from "./StatusPill";
@@ -18,8 +20,65 @@ function decision(claim: ClaimSummary): string {
   return outcomeLabels[claim.outcome];
 }
 
+function QueueControl({
+  run,
+  waiting,
+  onStarted,
+}: Readonly<{
+  run: QueueRun | undefined;
+  waiting: number;
+  onStarted: () => void;
+}>) {
+  if (run?.running) {
+    return (
+      <p className="working">
+        Working the queue, {run.claims_left} claims left
+      </p>
+    );
+  }
+  return (
+    <button
+      type="button"
+      disabled={waiting === 0}
+      onClick={() => {
+        void api.workQueue().then(onStarted);
+      }}
+    >
+      Work the queue
+    </button>
+  );
+}
+
+function RunButton({
+  claimId,
+  onStarted,
+}: Readonly<{ claimId: string; onStarted: () => void }>) {
+  const [queued, setQueued] = useState(false);
+
+  return (
+    <button
+      type="button"
+      className="small"
+      disabled={queued}
+      aria-label={`Run agent on ${claimId}`}
+      onClick={() => {
+        setQueued(true);
+        void api.runAgent(claimId).then(onStarted, onStarted);
+      }}
+    >
+      {queued ? "Queued" : "Run agent"}
+    </button>
+  );
+}
+
 export function QueuePage() {
   const claims = usePolling(api.listClaims, 2000);
+  const run = usePolling(api.getQueueRun, 2000);
+  const queueRunning = run.data?.running ?? false;
+  const refresh = () => {
+    claims.refresh();
+    run.refresh();
+  };
 
   if (claims.data === undefined) {
     return (
@@ -39,6 +98,11 @@ export function QueuePage() {
           <h1>Claims queue</h1>
           <p className="muted">{claims.data.length} claims</p>
         </div>
+        <QueueControl
+          run={run.data}
+          waiting={count("waiting")}
+          onStarted={refresh}
+        />
       </header>
       <section className="counts" aria-label="Claims by status">
         {statuses.map((status) => (
@@ -61,6 +125,9 @@ export function QueuePage() {
               </th>
               <th scope="col">Decision</th>
               <th scope="col">Status</th>
+              <th scope="col">
+                <span className="visually-hidden">Action</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -78,6 +145,11 @@ export function QueuePage() {
                 <td className="nowrap">{decision(claim)}</td>
                 <td>
                   <StatusPill status={claim.status} />
+                </td>
+                <td>
+                  {claim.status === "waiting" && !queueRunning && (
+                    <RunButton claimId={claim.claim_id} onStarted={refresh} />
+                  )}
                 </td>
               </tr>
             ))}

@@ -1,9 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, test } from "vitest";
 
 import type { Claim } from "./api";
 import { ClaimPage } from "./ClaimPage";
-import { claim, mockApi, policy, steps } from "./testing";
+import { calls, claim, mockApi, policy, steps } from "./testing";
 
 function show(shown: Claim) {
   mockApi({
@@ -104,5 +104,76 @@ test("says when the claim can't be loaded", async () => {
 
   expect(
     await screen.findByText("Claim CLM-9999 can't be loaded."),
+  ).toBeTruthy();
+});
+
+test("lists the agent's steps with their details", async () => {
+  show({ ...claim, status: "in_progress" });
+
+  expect(await screen.findByText("Read the claim")).toBeTruthy();
+  expect(screen.getByText("Decided: approve, $420.00")).toBeTruthy();
+  expect(screen.getByText("The agent is working on this claim.")).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Run agent" })).toBeNull();
+});
+
+test("says when the agent hasn't worked the claim", async () => {
+  mockApi({
+    "GET /api/claims/CLM-1001": claim,
+    "GET /api/claims/CLM-1001/steps": [],
+  });
+  render(<ClaimPage claimId="CLM-1001" />);
+
+  expect(
+    await screen.findByText("The agent hasn't worked this claim yet."),
+  ).toBeTruthy();
+});
+
+test("runs the agent on a waiting claim", async () => {
+  const fetchMock = mockApi({
+    "GET /api/claims/CLM-1001": claim,
+    "POST /api/claims/CLM-1001/run": { running: true, claims_left: 1 },
+  });
+  render(<ClaimPage claimId="CLM-1001" />);
+
+  fireEvent.click(await screen.findByRole("button", { name: "Run agent" }));
+
+  expect(await screen.findByRole("button", { name: "Queued" })).toBeTruthy();
+  expect(calls(fetchMock, "POST /api/claims/CLM-1001/run")).toBe(1);
+});
+
+test("signs off a payout over $1,000", async () => {
+  const fetchMock = mockApi({
+    "GET /api/claims/CLM-1001": {
+      ...claim,
+      status: "waiting_for_signoff",
+      outcome: "approve",
+      payout: 1150,
+      reasons: "Lost by the carrier.",
+      policy_section: "Section 5",
+    },
+    "POST /api/claims/CLM-1001/sign-off": claim,
+  });
+  render(<ClaimPage claimId="CLM-1001" />);
+
+  const button = await screen.findByRole("button", {
+    name: "Sign off and pay",
+  });
+  fireEvent.click(button);
+
+  await waitFor(() => {
+    expect(calls(fetchMock, "POST /api/claims/CLM-1001/sign-off")).toBe(1);
+  });
+  expect((button as HTMLButtonElement).disabled).toBe(true);
+});
+
+test("says the first step is coming once the agent starts", async () => {
+  mockApi({
+    "GET /api/claims/CLM-1001": { ...claim, status: "in_progress" },
+    "GET /api/claims/CLM-1001/steps": [],
+  });
+  render(<ClaimPage claimId="CLM-1001" />);
+
+  expect(
+    await screen.findByText("The agent's first step will show here."),
   ).toBeTruthy();
 });

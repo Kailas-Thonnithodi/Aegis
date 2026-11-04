@@ -171,6 +171,7 @@ def test_default_model_uses_model_name(monkeypatch):
 
     assert isinstance(model, ChatOpenAI)
     assert model.model_name == "openrouter/free"
+    assert model.rate_limiter is main.rate_limiter
 
 
 def test_cli_prints_where_each_claim_stands(monkeypatch, capsys):

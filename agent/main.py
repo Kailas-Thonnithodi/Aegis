@@ -8,6 +8,7 @@ from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, ToolCall, ToolMessage
+from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 from pydantic import SecretStr
@@ -23,6 +24,8 @@ SIGN_OFF = "This payout needs a handler's sign-off"
 
 client = httpx.Client(base_url=BACKEND_URL, timeout=60)
 checkpointer = InMemorySaver()
+# OpenRouter allows new accounts 20 requests a minute per model; stay under it.
+rate_limiter = InMemoryRateLimiter(requests_per_second=0.3)
 
 
 def call(method: str, path: str, body: dict[str, object] | None = None) -> str:
@@ -97,6 +100,8 @@ def default_model() -> BaseChatModel:
         base_url=OPENROUTER_URL,
         api_key=SecretStr(os.environ["OPENROUTER_API_KEY"]),
         reasoning_effort="medium",
+        rate_limiter=rate_limiter,
+        max_retries=5,
     )
 
 

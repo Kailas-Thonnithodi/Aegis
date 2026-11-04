@@ -155,13 +155,13 @@ The actions and the live view, then the whole pilot checked end to end.
 
 Success criteria:
 
-- [ ] Playwright: running the agent on CLM-1001 shows its steps, then "Decided", an approved payout of $420.00 and "Paid".
-- [ ] Playwright: running the agent on CLM-1002 ends in "Waiting for sign-off" with no payment. Clicking "Sign off and pay" shows "Paid" and the sign-off time.
-- [ ] Playwright: "Work the queue" ends with no waiting claims.
-- [ ] `vitest` passes at 80% coverage or more, with tests for the buttons, the steps view and sign-off.
-- [ ] Through the Playwright MCP server with the real model: after `npm run reset`, run the agent on a claim from the dashboard and watch its steps arrive while it works. Then click "Work the queue" and let it finish. Every claim ends `decided` or `waiting_for_signoff`, each decision has reasons and a policy section, and every referral states its reason.
-- [ ] After that run, `sqlite3 aegis.db "select count(*) from payments p join claims c using (claim_id) where p.amount > 1000 and c.signed_off_at is null"` prints `0`.
-- [ ] `npm run check` passes and the results are reported.
+- [x] Playwright: running the agent on CLM-1001 shows its steps, then "Decided", an approved payout of $420.00 and "Paid".
+- [x] Playwright: running the agent on CLM-1002 ends in "Waiting for sign-off" with no payment. Clicking "Sign off and pay" shows "Paid" and the sign-off time.
+- [x] Playwright: "Work the queue" ends with no waiting claims.
+- [x] `vitest` passes at 80% coverage or more, with tests for the buttons, the steps view and sign-off.
+- [x] Through the Playwright MCP server with the real model: after `npm run reset`, run the agent on a claim from the dashboard and watch its steps arrive while it works. Then click "Work the queue" and let it finish. Every claim ends `decided` or `waiting_for_signoff`, each decision has reasons and a policy section, and every referral states its reason.
+- [x] After that run, `sqlite3 aegis.db "select count(*) from payments p join claims c using (claim_id) where p.amount > 1000 and c.signed_off_at is null"` prints `0`.
+- [x] `npm run check` passes and the results are reported.
 
 ## Not in the pilot
 

@@ -1,4 +1,10 @@
-import { render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
 import { QueuePage } from "./QueuePage";
@@ -70,4 +76,61 @@ test("polls the queue every 2 seconds", async () => {
   await vi.advanceTimersByTimeAsync(4000);
 
   expect(calls(fetchMock, "GET /api/claims")).toBe(3);
+});
+
+test("works the queue and shows how many claims are left", async () => {
+  const fetchMock = mockApi({
+    "GET /api/claims": claims,
+    "GET /api/queue": { running: false, claims_left: 0 },
+    "POST /api/queue/run": { queued: 1 },
+  });
+  render(<QueuePage />);
+
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Work the queue" }),
+  );
+
+  await waitFor(() => {
+    expect(calls(fetchMock, "POST /api/queue/run")).toBe(1);
+  });
+});
+
+test("shows the queue run while it is going", async () => {
+  mockApi({
+    "GET /api/claims": claims,
+    "GET /api/queue": { running: true, claims_left: 12 },
+  });
+  render(<QueuePage />);
+
+  expect(
+    await screen.findByText("Working the queue, 12 claims left"),
+  ).toBeTruthy();
+  expect(screen.queryByRole("button", { name: "Work the queue" })).toBeNull();
+  expect(screen.queryByRole("button", { name: /^Run agent on/ })).toBeNull();
+});
+
+test("can't work the queue when nothing is waiting", async () => {
+  mockApi({ "GET /api/claims": [{ ...summary, status: "decided" }] });
+  render(<QueuePage />);
+
+  const button = await screen.findByRole("button", { name: "Work the queue" });
+  expect((button as HTMLButtonElement).disabled).toBe(true);
+});
+
+test("runs the agent on a waiting claim", async () => {
+  const fetchMock = mockApi({
+    "GET /api/claims": claims,
+    "POST /api/claims/CLM-1001/run": { running: true, claims_left: 1 },
+  });
+  render(<QueuePage />);
+
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Run agent on CLM-1001" }),
+  );
+
+  expect(await screen.findByText("Queued")).toBeTruthy();
+  expect(calls(fetchMock, "POST /api/claims/CLM-1001/run")).toBe(1);
+  expect(screen.getAllByRole("button", { name: /^Run agent on/ })).toHaveLength(
+    1,
+  );
 });

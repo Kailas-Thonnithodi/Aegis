@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { api, type Claim } from "./api";
 import { date, label, money, outcomeLabels, time } from "./format";
@@ -25,7 +25,35 @@ function payment(claim: Claim): string {
   return "None";
 }
 
-function DecisionPanel({ claim }: Readonly<{ claim: Claim }>) {
+function SignOff({
+  claimId,
+  onSignedOff,
+}: Readonly<{ claimId: string; onSignedOff: () => void }>) {
+  const [signing, setSigning] = useState(false);
+
+  return (
+    <div className="signoff">
+      <p className="muted">
+        This payout is over $1,000 and waits for a handler's sign-off.
+      </p>
+      <button
+        type="button"
+        disabled={signing}
+        onClick={() => {
+          setSigning(true);
+          void api.signOff(claimId).then(onSignedOff);
+        }}
+      >
+        Sign off and pay
+      </button>
+    </div>
+  );
+}
+
+function DecisionPanel({
+  claim,
+  onChanged,
+}: Readonly<{ claim: Claim; onChanged: () => void }>) {
   if (claim.outcome === null) {
     return (
       <section className="panel">
@@ -49,6 +77,45 @@ function DecisionPanel({ claim }: Readonly<{ claim: Claim }>) {
           <Fact name="Signed off">{time(claim.signed_off_at)}</Fact>
         )}
       </dl>
+      {claim.status === "waiting_for_signoff" && (
+        <SignOff claimId={claim.claim_id} onSignedOff={onChanged} />
+      )}
+    </section>
+  );
+}
+
+function StepsPanel({
+  claimId,
+  status,
+}: Readonly<{ claimId: string; status: Claim["status"] }>) {
+  const load = useCallback(() => api.listSteps(claimId), [claimId]);
+  const working = status === "waiting" || status === "in_progress";
+  const steps = usePolling(load, working ? 1000 : null).data ?? [];
+
+  return (
+    <section className="panel">
+      <h2>Agent steps</h2>
+      {steps.length === 0 ? (
+        <p className="muted">
+          {status === "in_progress"
+            ? "The agent's first step will show here."
+            : "The agent hasn't worked this claim yet."}
+        </p>
+      ) : (
+        <ol className="steps">
+          {steps.map((step, index) => (
+            <li key={`${step.at}-${String(index)}`}>
+              <details className="step">
+                <summary>
+                  <span>{step.title}</span>
+                  <span className="step-time">{time(step.at)}</span>
+                </summary>
+                <p className="step-detail">{step.detail}</p>
+              </details>
+            </li>
+          ))}
+        </ol>
+      )}
     </section>
   );
 }
@@ -145,7 +212,8 @@ function ClaimDetails({ claim }: Readonly<{ claim: Claim }>) {
 
 export function ClaimPage({ claimId }: Readonly<{ claimId: string }>) {
   const load = useCallback(() => api.getClaim(claimId), [claimId]);
-  const { data: claim, failed } = usePolling(load, 1000);
+  const { data: claim, failed, refresh } = usePolling(load, 1000);
+  const [queued, setQueued] = useState(false);
 
   if (claim === undefined) {
     return (
@@ -172,11 +240,27 @@ export function ClaimPage({ claimId }: Readonly<{ claimId: string }>) {
             {date(claim.incident_date)}. Submitted {date(claim.submitted_on)}.
           </p>
         </div>
+        {claim.status === "waiting" && (
+          <button
+            type="button"
+            disabled={queued}
+            onClick={() => {
+              setQueued(true);
+              void api.runAgent(claimId).then(refresh, refresh);
+            }}
+          >
+            {queued ? "Queued" : "Run agent"}
+          </button>
+        )}
+        {claim.status === "in_progress" && (
+          <p className="working">The agent is working on this claim.</p>
+        )}
       </header>
       <div className="columns">
         <ClaimDetails claim={claim} />
         <div className="stack">
-          <DecisionPanel claim={claim} />
+          <DecisionPanel claim={claim} onChanged={refresh} />
+          <StepsPanel claimId={claim.claim_id} status={claim.status} />
           <PolicyPanel policyId={claim.policy_id} />
         </div>
       </div>
