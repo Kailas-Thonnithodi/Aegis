@@ -44,11 +44,11 @@ A run reports each of these as a count and a percentage, over all its claims and
 
 Success criteria:
 
-- [ ] `uv run pytest backend` passes, with tests for each scoring case: outcome and payout match, outcome matches but payout differs, outcome differs, not finished.
-- [ ] A test shows the summary over a mix of results gives the right counts and percentages, both overall and without the manual claims.
-- [ ] A test shows the checker loads 25 queue decisions and 25 held-out decisions, and their claim ids match `claims.json` and `held_out_claims.json`.
-- [ ] `grep -rn "evals" agent` prints nothing.
-- [ ] `npm run check` passes.
+- [x] `uv run pytest backend` passes, with tests for each scoring case: outcome and payout match, outcome matches but payout differs, outcome differs, not finished.
+- [x] A test shows the summary over a mix of results gives the right counts and percentages, both overall and without the manual claims.
+- [x] A test shows the checker loads 25 queue decisions and 25 held-out decisions, and their claim ids match `claims.json` and `held_out_claims.json`.
+- [x] `grep -rn "evals" agent` prints nothing.
+- [x] `npm run check` passes.
 
 ## Phase 2: The check database and check runs
 

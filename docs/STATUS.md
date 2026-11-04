@@ -21,6 +21,6 @@ The claims pilot from `docs/PLAN.md` is built: all 6 phases are done.
 - `npm run reset` rebuilds the database from `data/`.
 - `uv run -m agent CLM-1001` runs the agent on one claim from the command line. The backend must be running.
 
-## Next
+## In progress
 
-- Checking the agent's decisions against `data/evals/`, in its own plan (`docs/PLAN_HARNESS.md`)
+The agent checker from `docs/PLAN_HARNESS.md`. Phase 1 of 5 is done: `backend/checker.py` loads the handlers' decisions from `data/evals/` and scores the agent's decisions against them.
