@@ -99,13 +99,13 @@ Replace the skeleton agent with one that works a claim through the API.
 
 Success criteria:
 
-- [ ] `uv run pytest agent` passes, including a test where the fake model approves CLM-1002 at $1,150.00 and calls `pay_claim`. The claim ends `waiting_for_signoff` with no payment, and a "Payment held for sign-off" step is recorded.
-- [ ] A test where the fake model stops without deciding leaves the claim `waiting`, with a step explaining why.
-- [ ] A test with `MODEL_NAME=stub` runs CLM-1001 to `decided` and paid.
-- [ ] `grep -rn "data/" agent` prints nothing, so the agent reads only through the API.
-- [ ] With the real model and the backend running, `uv run -m agent CLM-1001` approves $420.00 under section 3 (Premium plan, a crew cancellation, a delay well over 6 hours, under the $800 maximum) and pays it. `curl -s localhost:8000/api/claims/CLM-1001/steps` lists each step in order.
-- [ ] With the real model, one claim with a payout over $1,000 ends `waiting_for_signoff` with no payment.
-- [ ] `npm run check` passes.
+- [x] `uv run pytest agent` passes, including a test where the fake model approves CLM-1002 at $1,150.00 and calls `pay_claim`. The claim ends `waiting_for_signoff` with no payment, and a "Payment held for sign-off" step is recorded.
+- [x] A test where the fake model stops without deciding leaves the claim `waiting`, with a step explaining why.
+- [x] A test with `MODEL_NAME=stub` runs CLM-1001 to `decided` and paid.
+- [x] `grep -rn "data/" agent` prints nothing, so the agent reads only through the API.
+- [x] With the real model and the backend running, `uv run -m agent CLM-1001` approves $420.00 under section 3 (Premium plan, a crew cancellation, a delay well over 6 hours, under the $800 maximum) and pays it. `curl -s localhost:8000/api/claims/CLM-1001/steps` lists each step in order.
+- [x] With the real model, one claim with a payout over $1,000 ends `waiting_for_signoff` with no payment.
+- [x] `npm run check` passes.
 
 ## Phase 4: Running the agent from the backend
 
