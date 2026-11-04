@@ -1,34 +1,43 @@
-import { useEffect, useState } from "react";
+import { ClaimPage } from "./ClaimPage";
+import { useHash } from "./hooks";
+import { InstructionsPage } from "./InstructionsPage";
+import { QueuePage } from "./QueuePage";
 
-type Health = "checking" | "up" | "down";
-
-const messages: Record<Health, string> = {
-  checking: "Checking the backend.",
-  up: "The backend is up.",
-  down: "The backend is down.",
-};
+function Page({ hash }: Readonly<{ hash: string }>) {
+  if (hash === "#/instructions") return <InstructionsPage />;
+  const claimId = /^#\/claims\/([\w-]+)$/.exec(hash)?.[1];
+  if (claimId) return <ClaimPage key={claimId} claimId={claimId} />;
+  return <QueuePage />;
+}
 
 export function App() {
-  const [health, setHealth] = useState<Health>("checking");
-
-  useEffect(() => {
-    fetch("/api/health")
-      .then((response) => {
-        setHealth(response.ok ? "up" : "down");
-      })
-      .catch(() => {
-        setHealth("down");
-      });
-  }, []);
+  const hash = useHash();
+  const onInstructions = hash === "#/instructions";
 
   return (
-    <main>
-      <h1>Aegis Claims</h1>
-      <p className="tagline">Travel claims, decided with care</p>
-      <section className="panel">
-        <h2>Backend</h2>
-        <p className={`status status-${health}`}>{messages[health]}</p>
-      </section>
-    </main>
+    <>
+      <header className="top">
+        <div className="top-inner">
+          <a className="brand" href="#/">
+            Aegis Claims
+          </a>
+          <span className="tagline">Travel claims, decided with care</span>
+          <nav aria-label="Main">
+            <a href="#/" aria-current={onInstructions ? undefined : "page"}>
+              Queue
+            </a>
+            <a
+              href="#/instructions"
+              aria-current={onInstructions ? "page" : undefined}
+            >
+              Agent instructions
+            </a>
+          </nav>
+        </div>
+      </header>
+      <main>
+        <Page hash={hash} />
+      </main>
+    </>
   );
 }

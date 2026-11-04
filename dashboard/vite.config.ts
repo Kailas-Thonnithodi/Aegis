@@ -3,9 +3,12 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [react()],
-  server: { proxy: { "/api": "http://localhost:8000" } },
+  server: {
+    proxy: { "/api": process.env.BACKEND_URL ?? "http://localhost:8000" },
+  },
   test: {
     environment: "jsdom",
+    setupFiles: ["src/setup.ts"],
     coverage: {
       include: ["src/**"],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

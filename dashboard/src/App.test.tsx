@@ -1,32 +1,55 @@
-import { render, screen } from "@testing-library/react";
-import { afterEach, expect, test, vi } from "vitest";
+import { act, render, screen } from "@testing-library/react";
+import { expect, test } from "vitest";
 
 import { App } from "./App";
+import { claim, mockApi, policy, summary } from "./testing";
 
-afterEach(() => {
-  vi.unstubAllGlobals();
+const routes = {
+  "GET /api/claims": [summary],
+  "GET /api/claims/CLM-1001": claim,
+  "GET /api/policies/POL-2001": policy,
+  "GET /api/claims/CLM-1001/steps": [],
+  "GET /api/instructions": { text: "# Aegis Agent instructions" },
+  "GET /api/queue": { running: false, claims_left: 0 },
+};
+
+test("shows the queue by default", async () => {
+  mockApi(routes);
+  render(<App />);
+
+  expect(
+    await screen.findByRole("heading", { name: "Claims queue" }),
+  ).toBeTruthy();
+  expect(
+    screen.getByRole("link", { name: "Queue" }).getAttribute("aria-current"),
+  ).toBe("page");
 });
 
-test("shows the backend is up when the health check passes", async () => {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("{}")));
+test("follows the hash to a claim and to the instructions", async () => {
+  mockApi(routes);
   render(<App />);
-  expect(await screen.findByText("The backend is up.")).toBeTruthy();
-});
+  await screen.findByRole("heading", { name: "Claims queue" });
 
-test("shows the backend is down when the health check fails", async () => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(new Response("", { status: 500 })),
-  );
-  render(<App />);
-  expect(await screen.findByText("The backend is down.")).toBeTruthy();
-});
+  act(() => {
+    window.location.hash = "#/claims/CLM-1001";
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  });
+  expect(
+    await screen.findByRole("heading", {
+      name: "Flight home canceled by the airline",
+    }),
+  ).toBeTruthy();
 
-test("shows the backend is down when it cannot be reached", async () => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockRejectedValue(new TypeError("Failed to fetch")),
-  );
-  render(<App />);
-  expect(await screen.findByText("The backend is down.")).toBeTruthy();
+  act(() => {
+    window.location.hash = "#/instructions";
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  });
+  expect(
+    await screen.findByRole("heading", { name: "Agent instructions" }),
+  ).toBeTruthy();
+  expect(
+    screen
+      .getByRole("link", { name: "Agent instructions" })
+      .getAttribute("aria-current"),
+  ).toBe("page");
 });

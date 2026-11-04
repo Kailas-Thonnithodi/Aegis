@@ -136,12 +136,12 @@ The read side of the dashboard, in the Aegis brand.
 
 Success criteria:
 
-- [ ] `vitest` passes at 80% coverage or more, with tests for each page, the status pills, money formatting and polling.
-- [ ] `tsc` and ESLint pass with no `any`.
-- [ ] Through the Playwright MCP server, `http://localhost:5173/` shows 25 claims with status pills, and a screenshot in light mode and in dark mode matches the brand: panels with 12px radius, no outlines and jade as the only accent.
-- [ ] Clicking CLM-1001 opens its page with the story, 3 items, 4 documents and the Premium policy.
-- [ ] `#/instructions` shows the instructions text, and the page has no edit control.
-- [ ] `npm run check` passes.
+- [x] `vitest` passes at 80% coverage or more, with tests for each page, the status pills, money formatting and polling.
+- [x] `tsc` and ESLint pass with no `any`.
+- [x] Through the Playwright MCP server, `http://localhost:5173/` shows 25 claims with status pills, and a screenshot in light mode and in dark mode matches the brand: panels with 12px radius, no outlines and jade as the only accent.
+- [x] Clicking CLM-1001 opens its page with the story, 3 items, 4 documents and the Premium policy.
+- [x] `#/instructions` shows the instructions text, and the page has no edit control.
+- [x] `npm run check` passes.
 
 ## Phase 6: The dashboard: running, steps and sign-off, end to end
 

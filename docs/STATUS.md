@@ -1,14 +1,14 @@
 # Status
 
-Building the pilot from `docs/PLAN.md`. Phases 1 to 4 of 6 are done.
+Building the pilot from `docs/PLAN.md`. Phases 1 to 5 of 6 are done.
 
 - `backend/`: Aegis's records in SQLite (`aegis.db`, or the path in `AEGIS_DB`), seeded from `data/` on startup when empty. Read operations: `list_claims`, `get_claim`, `get_claim_history`, `get_policy`, `get_policy_wording`, plus `get_health`.
   - Write operations: `start_claim`, `record_decision`, `pay_claim`, `sign_off_claim`, `reset_claim`, `record_step`, `list_steps`, and `get_agent_instructions`, which serves `backend/agent_instructions.md` read only.
   - Runs: `run_agent` queues one waiting claim, `work_queue` queues every waiting claim, and `get_queue_run` reports progress. One background worker runs them one at a time.
   - Status moves `waiting` → `in_progress` → `decided`, or through `waiting_for_signoff` for approvals over $1,000. `pay_claim` refuses any payout over $1,000; only `sign_off_claim` releases it.
 - `agent/`: the Aegis Agent. `run(claim_id, thread_id)` starts the claim, works it with six tools over the backend's API (`get_claim`, `get_policy`, `get_claim_history`, `get_policy_wording`, `record_decision`, `pay_claim`) and posts each step. A run that ends with the claim still in progress returns it to the queue. `MODEL_NAME=stub` selects a scripted model for tests.
-- `dashboard/`: one page that shows whether the backend is up
-- `e2e/`: one test of that page
+- `dashboard/`: the queue (`#/`, polled every 2 seconds, with counts by status), each claim in full with its decision and policy (`#/claims/CLM-1001`, polled every second), and the agent's instructions, read only (`#/instructions`). Brand colors and fonts, light and dark mode.
+- `e2e/`: Playwright tests of the pages, on their own backend (port 8001, `e2e.db`, `MODEL_NAME=stub`) and dashboard (port 5174)
 
 ## Running
 

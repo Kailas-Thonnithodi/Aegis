@@ -1,19 +1,25 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const backend = "http://localhost:8001";
+
 export default defineConfig({
   testDir: "e2e",
-  use: { baseURL: "http://localhost:5173" },
+  workers: 1,
+  use: { baseURL: "http://localhost:5174" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: [
     {
-      command: "npm run dev:backend",
-      url: "http://localhost:8000/api/health",
-      reuseExistingServer: !process.env.CI,
+      command:
+        "uv run -m backend.seed && uv run -m uvicorn backend.main:app --port 8001",
+      url: `${backend}/api/health`,
+      reuseExistingServer: false,
+      env: { AEGIS_DB: "e2e.db", MODEL_NAME: "stub", BACKEND_URL: backend },
     },
     {
-      command: "npm run dev:dashboard",
-      url: "http://localhost:5173",
-      reuseExistingServer: !process.env.CI,
+      command: "npx vite dashboard --port 5174 --strictPort",
+      url: "http://localhost:5174",
+      reuseExistingServer: false,
+      env: { BACKEND_URL: backend },
     },
   ],
 });
