@@ -77,13 +77,13 @@ The write side of the API, with the status rules and the $1,000 rule enforced in
 
 Success criteria:
 
-- [ ] `uv run pytest backend` passes, with a test for every transition above and every refusal.
-- [ ] A test shows that for a claim approved at $1,150.00, `pay_claim` returns 409 and leaves no payment row, and that after `sign_off_claim` there's exactly one payment of $1,150.00 and the claim is `decided`.
-- [ ] A test shows that `pay_claim` with an amount other than the payout returns 409, and that paying twice returns 409.
-- [ ] Against the running backend, curl walks CLM-1001 through start, approve $420.00 and pay to `decided` with a payment.
-- [ ] Against the running backend, curl walks CLM-1002 through start and approve $1,150.00 to `waiting_for_signoff`. `pay_claim` returns 409 with the sign-off message, and `sign_off_claim` then moves it to `decided` with `signed_off_at` set.
-- [ ] `curl -s localhost:8000/api/instructions` returns the instructions text.
-- [ ] `npm run check` passes, and `npm run reset` restores 25 waiting claims.
+- [x] `uv run pytest backend` passes, with a test for every transition above and every refusal.
+- [x] A test shows that for a claim approved at $1,150.00, `pay_claim` returns 409 and leaves no payment row, and that after `sign_off_claim` there's exactly one payment of $1,150.00 and the claim is `decided`.
+- [x] A test shows that `pay_claim` with an amount other than the payout returns 409, and that paying twice returns 409.
+- [x] Against the running backend, curl walks CLM-1001 through start, approve $420.00 and pay to `decided` with a payment.
+- [x] Against the running backend, curl walks CLM-1002 through start and approve $1,150.00 to `waiting_for_signoff`. `pay_claim` returns 409 with the sign-off message, and `sign_off_claim` then moves it to `decided` with `signed_off_at` set.
+- [x] `curl -s localhost:8000/api/instructions` returns the instructions text.
+- [x] `npm run check` passes, and `npm run reset` restores 25 waiting claims.
 
 ## Phase 3: The Aegis Agent
 

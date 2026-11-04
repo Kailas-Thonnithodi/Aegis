@@ -69,3 +69,23 @@ class Claim(ClaimSummary):
 
 class Text(BaseModel):
     text: str
+
+
+class Decision(BaseModel):
+    outcome: Outcome
+    payout: float
+    reasons: str
+    policy_section: str
+
+
+class PaymentRequest(BaseModel):
+    amount: float
+
+
+class StepRequest(BaseModel):
+    title: str
+    detail: str
+
+
+class Step(StepRequest):
+    at: str
