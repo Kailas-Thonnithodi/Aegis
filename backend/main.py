@@ -8,13 +8,15 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException
 
-from backend import db
+from backend import db, runner
 from backend.models import (
     Claim,
     ClaimSummary,
     Decision,
     PaymentRequest,
     Policy,
+    Queued,
+    QueueRun,
     Step,
     StepRequest,
     Text,
@@ -257,3 +259,32 @@ def list_steps(claim_id: str, conn: Db) -> list[Step]:
 def get_agent_instructions() -> Text:
     """Get the Aegis Agent's instructions."""
     return Text(text=INSTRUCTIONS.read_text())
+
+
+def queue_run() -> QueueRun:
+    return QueueRun(running=bool(runner.queued), claims_left=len(runner.queued))
+
+
+@app.post("/api/claims/{claim_id}/run", operation_id="run_agent", status_code=202)
+def run_agent(claim_id: str, conn: Db) -> QueueRun:
+    """Queue a waiting claim for the Aegis Agent."""
+    row = claim_row(conn, claim_id)
+    require_status(row, "waiting", f"Claim {claim_id} is not waiting")
+    if not runner.enqueue([claim_id]):
+        raise HTTPException(409, f"Claim {claim_id} is already queued")
+    return queue_run()
+
+
+@app.post("/api/queue/run", operation_id="work_queue", status_code=202)
+def work_queue(conn: Db) -> Queued:
+    """Queue every waiting claim for the Aegis Agent, in claim order."""
+    rows = conn.execute(
+        "select claim_id from claims where status = 'waiting' order by claim_id"
+    ).fetchall()
+    return Queued(queued=len(runner.enqueue([row["claim_id"] for row in rows])))
+
+
+@app.get("/api/queue", operation_id="get_queue_run")
+def get_queue_run() -> QueueRun:
+    """Report whether the agent is working claims and how many are left."""
+    return queue_run()

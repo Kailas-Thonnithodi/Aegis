@@ -89,3 +89,12 @@ class StepRequest(BaseModel):
 
 class Step(StepRequest):
     at: str
+
+
+class QueueRun(BaseModel):
+    running: bool
+    claims_left: int
+
+
+class Queued(BaseModel):
+    queued: int

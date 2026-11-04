@@ -118,10 +118,10 @@ Let the dashboard start runs.
 
 Success criteria:
 
-- [ ] `uv run pytest` passes, with tests (stub model, worker run inline) for `run_agent`, `work_queue`, the 409, and skipping a claim that's no longer waiting.
-- [ ] With `MODEL_NAME=stub`, `curl -X POST localhost:8000/api/queue/run` returns 25 queued, and within a minute every claim is `decided` or `waiting_for_signoff`. Each claim with a payout over $1,000 has no payment.
-- [ ] While that run is going, `curl -s localhost:8000/api/queue` shows it running with a falling count, then idle.
-- [ ] `npm run check` passes.
+- [x] `uv run pytest` passes, with tests (stub model, worker run inline) for `run_agent`, `work_queue`, the 409, and skipping a claim that's no longer waiting.
+- [x] With `MODEL_NAME=stub`, `curl -X POST localhost:8000/api/queue/run` returns 25 queued, and within a minute every claim is `decided` or `waiting_for_signoff`. Each claim with a payout over $1,000 has no payment.
+- [x] While that run is going, `curl -s localhost:8000/api/queue` shows it running with a falling count, then idle.
+- [x] `npm run check` passes.
 
 ## Phase 5: The dashboard: queue, claims and instructions
 
