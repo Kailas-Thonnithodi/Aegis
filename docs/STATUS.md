@@ -1,11 +1,10 @@
 # Status
 
-Nothing of the product is built yet. The pilot plan's first phase builds the skeleton: `backend/`, `agent/`, `dashboard/`, `e2e/`, the root `package.json` scripts and the pre-commit hook.
+A hello-world skeleton with every check in place:
 
-What's here:
+- `backend/`: one route, `GET /api/health`
+- `agent/`: the entry point `run(claim_id, thread_id)`, with one tool that calls the health route
+- `dashboard/`: one page that shows whether the backend is up
+- `e2e/`: one test of that page
 
-- `data/`: the claims queue, the policies and the policy wording, described in `data/README.md`
-- `docs/`: the spec, tech stack, standards, process and brand
-- `notebooks/`: exploration only
-
-Update this file as you build.
+Nothing of Aegis is built yet. Update this file as you build.

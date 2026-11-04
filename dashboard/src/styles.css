@@ -1,0 +1,68 @@
+:root {
+  --page: #f5f7f7;
+  --panel: #ffffff;
+  --ink: #0b1f24;
+  --muted: #5a6a6f;
+  --jade-text: #04795b;
+  --raspberry: #c93558;
+  --shadow: 0 1px 2px rgb(11 31 36 / 0.06);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #0b1416;
+    --panel: #141f22;
+    --ink: #e6eef0;
+    --muted: #93a5aa;
+    --jade-text: #4fddb2;
+    --shadow: none;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: "Instrument Sans", sans-serif;
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+h1,
+h2 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.tagline {
+  font-family: "Instrument Serif", serif;
+  font-style: italic;
+  color: var(--muted);
+  margin: 4px 0 32px;
+}
+
+.panel {
+  background: var(--panel);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+.status {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.status-up {
+  color: var(--jade-text);
+}
+
+.status-down {
+  color: var(--raspberry);
+}
