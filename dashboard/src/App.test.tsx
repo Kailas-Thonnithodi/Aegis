@@ -11,6 +11,8 @@ const routes = {
   "GET /api/claims/CLM-1001/steps": [],
   "GET /api/instructions": { text: "# Aegis Agent instructions" },
   "GET /api/queue": { running: false, claims_left: 0 },
+  "GET /api/checks/claims": [],
+  "GET /api/checks": [],
 };
 
 test("shows the queue by default", async () => {
@@ -51,5 +53,18 @@ test("follows the hash to a claim and to the instructions", async () => {
     screen
       .getByRole("link", { name: "Agent instructions" })
       .getAttribute("aria-current"),
+  ).toBe("page");
+});
+
+test("opens the checks page from the hash", async () => {
+  mockApi(routes);
+  window.location.hash = "#/checks";
+  render(<App />);
+
+  expect(
+    await screen.findByRole("heading", { name: "Agent checks" }),
+  ).toBeTruthy();
+  expect(
+    screen.getByRole("link", { name: "Checks" }).getAttribute("aria-current"),
   ).toBe("page");
 });

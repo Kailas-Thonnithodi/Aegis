@@ -89,9 +89,9 @@ Success criteria:
 
 Success criteria:
 
-- [ ] `vitest` passes at 80% coverage or more, with tests for each filter, "Select all shown", the selection count, the disabled button and starting a run.
-- [ ] Through the Playwright MCP server, `#/checks` shows 50 claims. Filtering to held-out, then hard, leaves only those claims, and "Select all shown" picks them all. Screenshots in light and dark mode match the brand.
-- [ ] `npm run check` passes.
+- [x] `vitest` passes at 80% coverage or more, with tests for each filter, "Select all shown", the selection count, the disabled button and starting a run.
+- [x] Through the Playwright MCP server, `#/checks` shows 50 claims. Filtering to held-out, then hard, leaves only those claims, and "Select all shown" picks them all. Screenshots in light and dark mode match the brand.
+- [x] `npm run check` passes.
 
 ## Phase 5: The Checks page: results, end to end
 

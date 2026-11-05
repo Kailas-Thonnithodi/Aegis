@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-import type { Claim, ClaimSummary, Policy, Step } from "./api";
+import type { CheckClaim, Claim, ClaimSummary, Policy, Step } from "./api";
 
 export const summary: ClaimSummary = {
   claim_id: "CLM-1001",
@@ -86,3 +86,42 @@ export function calls(fetchMock: ReturnType<typeof mockApi>, key: string) {
     ([input, init]) => `${init?.method ?? "GET"} ${input}` === key,
   ).length;
 }
+
+export const checkClaims: CheckClaim[] = [
+  {
+    claim_id: "CLM-1001",
+    set: "queue",
+    claim_type: "trip_delay",
+    summary: "Flight home canceled",
+    amount_claimed: 420,
+    difficulty: "routine",
+    handler_outcome: "approve",
+  },
+  {
+    claim_id: "CLM-1002",
+    set: "queue",
+    claim_type: "baggage",
+    summary: "Suitcase lost",
+    amount_claimed: 1150,
+    difficulty: "hard",
+    handler_outcome: "approve",
+  },
+  {
+    claim_id: "CLM-1101",
+    set: "held_out",
+    claim_type: "trip_delay",
+    summary: "Typhoon canceled a flight",
+    amount_claimed: 2580,
+    difficulty: "routine",
+    handler_outcome: "approve",
+  },
+  {
+    claim_id: "CLM-1102",
+    set: "held_out",
+    claim_type: "baggage",
+    summary: "Bag left in a car",
+    amount_claimed: 900,
+    difficulty: "hard",
+    handler_outcome: "decline",
+  },
+];

@@ -13,7 +13,12 @@ export default defineConfig({
         "uv run -m backend.seed && uv run -m uvicorn backend.main:app --port 8001",
       url: `${backend}/api/health`,
       reuseExistingServer: false,
-      env: { AEGIS_DB: "e2e.db", MODEL_NAME: "stub", BACKEND_URL: backend },
+      env: {
+        AEGIS_DB: "e2e.db",
+        AEGIS_CHECK_DB: "e2e-checks.db",
+        MODEL_NAME: "stub",
+        BACKEND_URL: backend,
+      },
     },
     {
       command: "npx vite dashboard --port 5174 --strictPort",

@@ -13,6 +13,11 @@ export const outcomeLabels: Record<Outcome, string> = {
   refer: "Referred",
 };
 
+export const setLabels: Record<string, string> = {
+  queue: "Queue",
+  held_out: "Held-out",
+};
+
 export function money(amount: number): string {
   return `$${amount.toLocaleString("en-US", {
     minimumFractionDigits: 2,
