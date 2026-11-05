@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from backend import db
 from backend.db import DATA
-from backend.models import Outcome
+from backend.models import Outcome, Step
 
 EVALS = DATA / "evals"
 
@@ -134,8 +134,109 @@ class CheckRunSummary(BaseModel):
     matches: int
 
 
+class CheckClaim(BaseModel):
+    claim_id: str
+    set: ClaimSet
+    claim_type: str
+    summary: str
+    amount_claimed: float
+    difficulty: str
+    handler_outcome: Outcome
+
+
+class AgentDecision(BaseModel):
+    outcome: Outcome | None
+    payout: float | None
+    reasons: str | None
+    policy_section: str | None
+
+
+class CheckResult(BaseModel):
+    claim_id: str
+    claim_type: str
+    summary: str
+    score: Score | None
+    agent: AgentDecision
+    handler: HandlerDecision
+    steps: list[Step]
+
+
+class CheckRun(CheckRunSummary):
+    summary: CheckSummary
+    results: list[CheckResult]
+
+
 def check_claims() -> list[dict[str, object]]:
     return db.queue_claims() + held_out_claims()
+
+
+@cache
+def claims_by_id() -> dict[str, dict[str, object]]:
+    return {str(claim["claim_id"]): claim for claim in check_claims()}
+
+
+def list_claims() -> list[CheckClaim]:
+    key = answer_key()
+    return [
+        CheckClaim.model_validate(
+            {
+                **claim,
+                "set": key[claim_id].set,
+                "difficulty": key[claim_id].difficulty,
+                "handler_outcome": key[claim_id].decision,
+            }
+        )
+        for claim_id, claim in claims_by_id().items()
+    ]
+
+
+def to_result(row: sqlite3.Row) -> CheckResult:
+    claim = claims_by_id()[row["claim_id"]]
+    return CheckResult.model_validate(
+        {
+            "claim_id": row["claim_id"],
+            "claim_type": claim["claim_type"],
+            "summary": claim["summary"],
+            "score": row["score"],
+            "agent": {
+                "outcome": row["outcome"],
+                "payout": row["payout"],
+                "reasons": row["reasons"],
+                "policy_section": row["policy_section"],
+            },
+            "handler": answer_key()[row["claim_id"]],
+            "steps": json.loads(row["steps"] or "[]"),
+        }
+    )
+
+
+def to_scored(result: CheckResult, row: sqlite3.Row) -> Scored:
+    return Scored.model_validate(
+        {
+            "set": result.handler.set,
+            "claim_type": result.claim_type,
+            "difficulty": result.handler.difficulty,
+            "score": row["score"],
+            "outcome_match": bool(row["outcome_match"]),
+            "payout_match": bool(row["payout_match"]),
+        }
+    )
+
+
+def check_run(conn: sqlite3.Connection, run_id: int) -> CheckRun:
+    rows = conn.execute(
+        "select * from check_results where run_id = ? order by position",
+        (run_id,),
+    ).fetchall()
+    results = [to_result(row) for row in rows]
+    scored = [
+        to_scored(r, row) for r, row in zip(results, rows, strict=True) if r.score
+    ]
+    return CheckRun(
+        **run_summary(conn, run_id).model_dump(),
+        summary=summarize(scored),
+        results=results,
+    )
 
 
 def record_result(conn: sqlite3.Connection, run_id: int, claim_id: str) -> None:

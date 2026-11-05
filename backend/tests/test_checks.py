@@ -121,3 +121,71 @@ def test_the_check_api_serves_claims_and_no_handler_decisions(client):
     assert handler.reason not in claim.text
     assert client.get("/check/api/claims/CLM-1101/history").json() == []
     assert len(client.get("/api/claims").json()) == 25
+
+
+def test_list_check_claims_covers_both_sets(client):
+    claims = client.get("/api/checks/claims").json()
+
+    assert len(claims) == 50
+    for claim_set in ("queue", "held_out"):
+        in_set = [c for c in claims if c["set"] == claim_set]
+        assert len(in_set) == 25
+        assert sum(c["difficulty"] == "manual" for c in in_set) == 5
+    assert claims[0]["claim_id"] == "CLM-1001"
+    assert claims[0]["handler_outcome"] == "approve"
+
+
+def test_get_check_run_shows_scores_and_both_decisions(client, worker):
+    run_id = start(client, ["CLM-1001", "CLM-1101"]).json()["run_id"]
+    worker.run_all()
+
+    run = client.get(f"/api/checks/{run_id}").json()
+
+    assert run["done"] == 2
+    assert run["matches"] == 1
+    assert run["finished_at"] is not None
+    assert run["summary"]["overall"] == {
+        "claims": 2,
+        "matches": 1,
+        "outcome_matches": 2,
+        "payout_matches": 1,
+    }
+    assert set(run["summary"]["by_set"]) == {"queue", "held_out"}
+    match, miss = run["results"]
+    assert match["claim_id"] == "CLM-1001"
+    assert match["score"] == "match"
+    assert match["handler"]["payout"] == 420
+    assert match["steps"][0]["title"] == "Read the claim"
+    assert miss["score"] == "payout_miss"
+    assert miss["agent"]["payout"] == 2580
+    assert miss["handler"]["payout"] == 580
+    assert miss["handler"]["calculation"]
+
+
+def test_a_check_run_in_progress_counts_only_finished_claims(client, worker):
+    run_id = start(client, ["CLM-1001"]).json()["run_id"]
+
+    run = client.get(f"/api/checks/{run_id}").json()
+
+    assert run["done"] == 0
+    assert run["results"][0]["score"] is None
+    assert run["results"][0]["steps"] == []
+    assert run["summary"]["overall"]["claims"] == 0
+
+
+def test_list_check_runs_is_newest_first(client, worker):
+    first = start(client, ["CLM-1001"]).json()["run_id"]
+    second = start(client, ["CLM-1101"]).json()["run_id"]
+    worker.run_all()
+
+    runs = client.get("/api/checks").json()
+
+    assert [r["run_id"] for r in runs] == [second, first]
+    assert runs[1]["matches"] == 1
+
+
+def test_unknown_check_run_is_not_found(client):
+    response = client.get("/api/checks/99")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "No check run 99"

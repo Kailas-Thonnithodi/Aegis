@@ -75,10 +75,10 @@ Success criteria:
 
 Success criteria:
 
-- [ ] `uv run pytest backend` passes, with tests for each operation and for 404 on an unknown run.
-- [ ] `curl -s localhost:8000/api/checks/claims` returns 50 claims, 25 in each set, with 5 marked `manual` in each.
-- [ ] After a stub-model run on CLM-1001 and CLM-1101, `curl -s localhost:8000/api/checks/1` shows CLM-1001 as a match (the stub approves the $420.00 claimed, which is the handler's payout) and CLM-1101 as a payout miss (the stub approves $2,580.00, the handler $580.00).
-- [ ] `npm run check` passes.
+- [x] `uv run pytest backend` passes, with tests for each operation and for 404 on an unknown run.
+- [x] `curl -s localhost:8000/api/checks/claims` returns 50 claims, 25 in each set, with 5 marked `manual` in each.
+- [x] After a stub-model run on CLM-1001 and CLM-1101, `curl -s localhost:8000/api/checks/1` shows CLM-1001 as a match (the stub approves the $420.00 claimed, which is the handler's payout) and CLM-1101 as a payout miss (the stub approves $2,580.00, the handler $580.00).
+- [x] `npm run check` passes.
 
 ## Phase 4: The Checks page: picking claims
 
