@@ -226,3 +226,10 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Aegis database
+aegis.db
+e2e.db
+.playwright-mcp/
+checks.db
+e2e-checks.db
