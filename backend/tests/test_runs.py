@@ -18,12 +18,10 @@ class FakeWorker:
 
 
 @pytest.fixture
-def worker(client, monkeypatch):
+def worker(client, agent_backend, monkeypatch):
     fake = FakeWorker()
     monkeypatch.setattr(runner, "worker", fake)
     monkeypatch.setattr(runner, "queued", [])
-    monkeypatch.setattr(agent, "client", client)
-    monkeypatch.setenv("MODEL_NAME", "stub")
     return fake
 
 

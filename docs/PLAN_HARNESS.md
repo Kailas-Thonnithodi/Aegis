@@ -60,12 +60,12 @@ Success criteria:
 
 Success criteria:
 
-- [ ] `uv run pytest` passes, with tests (stub model, worker run inline) showing that a check run on CLM-1001 and CLM-1101 scores both claims and stores their steps.
-- [ ] A test shows a check run leaves the live queue untouched: every claim's status, decision and payment in `aegis.db` is the same before and after.
-- [ ] A test shows `start_check` returns 422 for an empty list and 404 for an unknown claim id.
-- [ ] A test shows no response from the `/check` API includes a handler's decision, reason or calculation.
-- [ ] With `MODEL_NAME=stub`, a curl to `POST /api/checks` with `["CLM-1001", "CLM-1101"]` returns the run, and within seconds the run is finished with 2 results.
-- [ ] `npm run check` passes.
+- [x] `uv run pytest` passes, with tests (stub model, worker run inline) showing that a check run on CLM-1001 and CLM-1101 scores both claims and stores their steps.
+- [x] A test shows a check run leaves the live queue untouched: every claim's status, decision and payment in `aegis.db` is the same before and after.
+- [x] A test shows `start_check` returns 422 for an empty list and 404 for an unknown claim id.
+- [x] A test shows no response from the `/check` API includes a handler's decision, reason or calculation.
+- [x] With `MODEL_NAME=stub`, a curl to `POST /api/checks` with `["CLM-1001", "CLM-1101"]` returns the run, and within seconds the run is finished with 2 results.
+- [x] `npm run check` passes.
 
 ## Phase 3: The check API
 

@@ -231,3 +231,5 @@ playwright/.cache/
 aegis.db
 e2e.db
 .playwright-mcp/
+checks.db
+e2e-checks.db

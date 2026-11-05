@@ -2,13 +2,11 @@ import json
 import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException
 
-from backend import db, runner
+from backend import checks_api, db, runner
 from backend.models import (
     Claim,
     ClaimSummary,
@@ -33,8 +31,8 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
 
 
 app = FastAPI(title="Aegis", lifespan=lifespan)
-
-Db = Annotated[sqlite3.Connection, Depends(db.get_db)]
+claims_api = APIRouter()
+Db = db.Db
 
 
 def claim_row(conn: sqlite3.Connection, claim_id: str) -> sqlite3.Row:
@@ -51,16 +49,12 @@ def require_status(row: sqlite3.Row, status: str, message: str) -> None:
         raise HTTPException(409, message)
 
 
-def now() -> str:
-    return datetime.now(UTC).isoformat(timespec="seconds")
-
-
 def money(amount: float) -> str:
     return f"${amount:,.2f}"
 
 
 def pay(conn: sqlite3.Connection, claim_id: str, amount: float) -> None:
-    conn.execute("insert into payments values (?, ?, ?)", (claim_id, amount, now()))
+    conn.execute("insert into payments values (?, ?, ?)", (claim_id, amount, db.now()))
     conn.execute("update claims set status = 'decided' where claim_id = ?", (claim_id,))
     conn.commit()
 
@@ -97,20 +91,20 @@ def get_health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/api/claims", operation_id="list_claims")
+@claims_api.get("/api/claims", operation_id="list_claims")
 def list_claims(conn: Db) -> list[ClaimSummary]:
     """List the claims queue with where each claim stands."""
     rows = conn.execute("select * from claims order by claim_id").fetchall()
     return [to_summary(row) for row in rows]
 
 
-@app.get("/api/claims/{claim_id}", operation_id="get_claim")
+@claims_api.get("/api/claims/{claim_id}", operation_id="get_claim")
 def get_claim(claim_id: str, conn: Db) -> Claim:
     """Get a claim in full, with its decision and payment."""
     return to_claim(conn, claim_row(conn, claim_id))
 
 
-@app.get("/api/claims/{claim_id}/history", operation_id="get_claim_history")
+@claims_api.get("/api/claims/{claim_id}/history", operation_id="get_claim_history")
 def get_claim_history(claim_id: str, conn: Db) -> list[ClaimSummary]:
     """List the customer's other claims."""
     row = claim_row(conn, claim_id)
@@ -122,7 +116,7 @@ def get_claim_history(claim_id: str, conn: Db) -> list[ClaimSummary]:
     return [to_summary(other) for other in rows]
 
 
-@app.get("/api/policies/{policy_id}", operation_id="get_policy")
+@claims_api.get("/api/policies/{policy_id}", operation_id="get_policy")
 def get_policy(policy_id: str, conn: Db) -> Policy:
     """Get a customer's policy."""
     row = conn.execute(
@@ -133,13 +127,13 @@ def get_policy(policy_id: str, conn: Db) -> Policy:
     return Policy.model_validate_json(row["record"])
 
 
-@app.get("/api/policy-wording", operation_id="get_policy_wording")
+@claims_api.get("/api/policy-wording", operation_id="get_policy_wording")
 def get_policy_wording() -> Text:
     """Get the policy wording that claims are decided from."""
     return Text(text=(db.DATA / "policy_wording.md").read_text())
 
 
-@app.post("/api/claims/{claim_id}/start", operation_id="start_claim")
+@claims_api.post("/api/claims/{claim_id}/start", operation_id="start_claim")
 def start_claim(claim_id: str, conn: Db) -> Claim:
     """Mark a waiting claim as in progress."""
     row = claim_row(conn, claim_id)
@@ -151,7 +145,7 @@ def start_claim(claim_id: str, conn: Db) -> Claim:
     return get_claim(claim_id, conn)
 
 
-@app.post("/api/claims/{claim_id}/decision", operation_id="record_decision")
+@claims_api.post("/api/claims/{claim_id}/decision", operation_id="record_decision")
 def record_decision(claim_id: str, decision: Decision, conn: Db) -> Claim:
     """Record the decision on a claim in progress."""
     row = claim_row(conn, claim_id)
@@ -185,7 +179,7 @@ def record_decision(claim_id: str, decision: Decision, conn: Db) -> Claim:
     return get_claim(claim_id, conn)
 
 
-@app.post("/api/claims/{claim_id}/payment", operation_id="pay_claim")
+@claims_api.post("/api/claims/{claim_id}/payment", operation_id="pay_claim")
 def pay_claim(claim_id: str, payment: PaymentRequest, conn: Db) -> Claim:
     """Pay the approved payout on a claim."""
     claim = get_claim(claim_id, conn)
@@ -203,7 +197,7 @@ def pay_claim(claim_id: str, payment: PaymentRequest, conn: Db) -> Claim:
     return get_claim(claim_id, conn)
 
 
-@app.post("/api/claims/{claim_id}/sign-off", operation_id="sign_off_claim")
+@claims_api.post("/api/claims/{claim_id}/sign-off", operation_id="sign_off_claim")
 def sign_off_claim(claim_id: str, conn: Db) -> Claim:
     """Sign off a payout over $1,000 and release the payment."""
     row = claim_row(conn, claim_id)
@@ -211,13 +205,13 @@ def sign_off_claim(claim_id: str, conn: Db) -> Claim:
         row, "waiting_for_signoff", f"Claim {claim_id} is not waiting for sign-off"
     )
     conn.execute(
-        "update claims set signed_off_at = ? where claim_id = ?", (now(), claim_id)
+        "update claims set signed_off_at = ? where claim_id = ?", (db.now(), claim_id)
     )
     pay(conn, claim_id, row["payout"])
     return get_claim(claim_id, conn)
 
 
-@app.post("/api/claims/{claim_id}/reset", operation_id="reset_claim")
+@claims_api.post("/api/claims/{claim_id}/reset", operation_id="reset_claim")
 def reset_claim(claim_id: str, conn: Db) -> Claim:
     """Return an unfinished claim to the queue, clearing its decision."""
     row = claim_row(conn, claim_id)
@@ -231,11 +225,11 @@ def reset_claim(claim_id: str, conn: Db) -> Claim:
     return get_claim(claim_id, conn)
 
 
-@app.post("/api/claims/{claim_id}/steps", operation_id="record_step")
+@claims_api.post("/api/claims/{claim_id}/steps", operation_id="record_step")
 def record_step(claim_id: str, step: StepRequest, conn: Db) -> Step:
     """Record a step the agent took on a claim."""
     claim_row(conn, claim_id)
-    recorded = Step(at=now(), title=step.title, detail=step.detail)
+    recorded = Step(at=db.now(), title=step.title, detail=step.detail)
     conn.execute(
         "insert into steps (claim_id, at, title, detail) values (?, ?, ?, ?)",
         (claim_id, recorded.at, recorded.title, recorded.detail),
@@ -244,7 +238,7 @@ def record_step(claim_id: str, step: StepRequest, conn: Db) -> Step:
     return recorded
 
 
-@app.get("/api/claims/{claim_id}/steps", operation_id="list_steps")
+@claims_api.get("/api/claims/{claim_id}/steps", operation_id="list_steps")
 def list_steps(claim_id: str, conn: Db) -> list[Step]:
     """List the steps the agent took on a claim, in order."""
     claim_row(conn, claim_id)
@@ -255,7 +249,7 @@ def list_steps(claim_id: str, conn: Db) -> list[Step]:
     return [Step.model_validate(dict(row)) for row in rows]
 
 
-@app.get("/api/instructions", operation_id="get_agent_instructions")
+@claims_api.get("/api/instructions", operation_id="get_agent_instructions")
 def get_agent_instructions() -> Text:
     """Get the Aegis Agent's instructions."""
     return Text(text=INSTRUCTIONS.read_text())
@@ -288,3 +282,12 @@ def work_queue(conn: Db) -> Queued:
 def get_queue_run() -> QueueRun:
     """Report whether the agent is working claims and how many are left."""
     return queue_run()
+
+
+app.include_router(claims_api)
+app.include_router(checks_api.router)
+
+check_app = FastAPI(title="Aegis checks")
+check_app.include_router(claims_api)
+check_app.dependency_overrides[db.get_db] = db.get_check_db
+app.mount("/check", check_app)
