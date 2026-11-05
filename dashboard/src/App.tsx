@@ -1,3 +1,4 @@
+import { CheckRunPage } from "./CheckRunPage";
 import { ChecksPage } from "./ChecksPage";
 import { ClaimPage } from "./ClaimPage";
 import { useHash } from "./hooks";
@@ -7,6 +8,8 @@ import { QueuePage } from "./QueuePage";
 function Page({ hash }: Readonly<{ hash: string }>) {
   if (hash === "#/instructions") return <InstructionsPage />;
   if (hash === "#/checks") return <ChecksPage />;
+  const runId = /^#\/checks\/(\d+)$/.exec(hash)?.[1];
+  if (runId) return <CheckRunPage key={runId} runId={runId} />;
   const claimId = /^#\/claims\/([\w-]+)$/.exec(hash)?.[1];
   if (claimId) return <ClaimPage key={claimId} claimId={claimId} />;
   return <QueuePage />;

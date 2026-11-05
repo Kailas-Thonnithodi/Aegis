@@ -105,11 +105,11 @@ Success criteria:
 
 Success criteria:
 
-- [ ] Playwright: picking CLM-1001 and CLM-1101 and clicking "Run checks" opens the results page. It ends with CLM-1001 marked a match, CLM-1101 a payout miss, and a score of 1 of 2.
-- [ ] Playwright: the live queue shows the same statuses before and after a check run.
-- [ ] `vitest` passes at 80% coverage or more, with tests for the progress, the score tiles, the breakdown and an opened row.
-- [ ] Through the Playwright MCP server with the real model: run checks on all 25 held-out claims and let the run finish. Every claim has a result, and the score is shown overall and without the manual claims. Report the scores to Kailas, along with the claims the agent missed and why.
-- [ ] `npm run check` passes and the results are reported.
+- [x] Playwright: picking CLM-1001 and CLM-1101 and clicking "Run checks" opens the results page. It ends with CLM-1001 marked a match, CLM-1101 a payout miss, and a score of 1 of 2.
+- [x] Playwright: the live queue shows the same statuses before and after a check run.
+- [x] `vitest` passes at 80% coverage or more, with tests for the progress, the score tiles, the breakdown and an opened row.
+- [x] Through the Playwright MCP server with the real model: run checks on all 25 held-out claims and let the run finish. Every claim has a result, and the score is shown overall and without the manual claims. Report the scores to Kailas, along with the claims the agent missed and why.
+- [x] `npm run check` passes and the results are reported.
 
 ## Not in this build
 

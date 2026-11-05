@@ -9,6 +9,7 @@
   --jade-text: #04795b;
   --amber: #f2b544;
   --amber-text: #9a6500;
+  --coral: #f2876a;
   --cerulean: #1675a5;
   --raspberry: #c93558;
   --on-accent: #0b1f24;
@@ -538,4 +539,135 @@ input[type="checkbox"] {
   padding: 8px 12px;
   border-radius: 8px;
   background: var(--subtle);
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+
+.tile-note {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.pill-pending {
+  background: var(--subtle);
+  color: var(--muted);
+}
+
+.pill-score-match {
+  background: var(--jade);
+  color: var(--on-accent);
+}
+
+.pill-score-payout_miss {
+  background: var(--amber);
+  color: var(--on-accent);
+}
+
+.pill-score-outcome_miss {
+  background: var(--coral);
+  color: var(--on-accent);
+}
+
+.pill-score-not_finished {
+  background: var(--raspberry);
+  color: #ffffff;
+}
+
+.results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result summary {
+  cursor: pointer;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 80px 64px minmax(0, 1fr) 196px 206px 104px;
+  font-size: 14px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--subtle);
+}
+
+.result summary .pill {
+  justify-self: start;
+}
+
+.result summary .nowrap {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result summary::-webkit-details-marker {
+  display: none;
+}
+
+.result-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-detail {
+  padding: 16px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.compare p + p {
+  margin-top: 8px;
+}
+
+.outcome-line {
+  font-weight: 600;
+}
+
+.calculation,
+.result-steps {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calculation li,
+.result-steps li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.result-steps {
+  margin: 0;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .result summary {
+    grid-template-columns: 90px minmax(0, 1fr);
+  }
+
+  .compare {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

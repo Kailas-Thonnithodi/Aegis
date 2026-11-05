@@ -6,9 +6,12 @@ export interface Polled<T> {
   refresh: () => void;
 }
 
+const always = () => true;
+
 export function usePolling<T>(
   load: () => Promise<T>,
   intervalMs: number | null,
+  keepPolling: (data: T) => boolean = always,
 ): Polled<T> {
   const [data, setData] = useState<T>();
   const [failed, setFailed] = useState(false);
@@ -16,26 +19,27 @@ export function usePolling<T>(
 
   useEffect(() => {
     let active = true;
+    let timer: ReturnType<typeof setInterval> | undefined;
     const fetchNow = () => {
       load()
         .then((value) => {
           if (active) {
             setData(value);
             setFailed(false);
+            if (!keepPolling(value)) clearInterval(timer);
           }
         })
         .catch(() => {
           if (active) setFailed(true);
         });
     };
+    if (intervalMs !== null) timer = setInterval(fetchNow, intervalMs);
     fetchNow();
-    const timer =
-      intervalMs === null ? undefined : setInterval(fetchNow, intervalMs);
     return () => {
       active = false;
       clearInterval(timer);
     };
-  }, [load, intervalMs, tick]);
+  }, [load, intervalMs, keepPolling, tick]);
 
   return {
     data,

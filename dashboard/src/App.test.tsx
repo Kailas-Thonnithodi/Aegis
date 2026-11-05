@@ -68,3 +68,11 @@ test("opens the checks page from the hash", async () => {
     screen.getByRole("link", { name: "Checks" }).getAttribute("aria-current"),
   ).toBe("page");
 });
+
+test("opens a check run from the hash", async () => {
+  mockApi(routes);
+  window.location.hash = "#/checks/4";
+  render(<App />);
+
+  expect(await screen.findByText("Check run 4 can't be loaded.")).toBeTruthy();
+});
